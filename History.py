@@ -13,9 +13,12 @@ class History:
         return str(self.data)
         
     def add(self, keyString):
-       self.queue.append(keyString)
+        if len(keyString.replace('0','')) > 12:
+            return
+        self.queue.append(keyString)
     
-    def file(self, win):
+    def file(self):
+        win = True
         # if stage n was "win", then n-1 is "lose", and n-2 is "win" ...
         for item in reversed(self.queue):
             try:

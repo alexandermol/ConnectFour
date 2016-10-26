@@ -4,6 +4,8 @@ class CFBoard:
     
     def __init__(self):
         self.board = []
+        self.keyString = "000000000000000000000000000000000000000000"
+        self.groundLevel = [5,5,5,5,5,5,5]
         for i in range(6):
             row = []
             for i in range(7):
@@ -12,6 +14,9 @@ class CFBoard:
     
     def __getitem__(self,i):
         return self.board[i]
+        
+    def __len__(self):
+        return len(self.board)
     
     def __str__(self):
         output = ""
@@ -28,7 +33,11 @@ class CFBoard:
         for i in range(len(self.board[0])):
             output += str(i) + " "
         return output
-        
+    
+    def updateKeyString(self, r, c, v):
+        pos = (5-r)*7 + c
+        self.keyString = self.keyString[:pos]+str(v)+self.keyString[pos+1:]
+    
     def play(self, c, maxToMove):
         if maxToMove:
             v = 1
@@ -40,26 +49,28 @@ class CFBoard:
         if self.board[0][c] != 0:
             print 'This column is full.'
             return
-        pos = 0
-        while pos+1 < len(self.board) and self.board[pos+1][c] == 0:
-            pos += 1
-        self.board[pos][c] = v
+        r = self.groundLevel[c]
+        self.board[r][c] = v
+        self.updateKeyString(r,c,v)
+        self.groundLevel[c] -= 1
     
     def erase(self, c):
-        for r in range(len(self.board)):
-            if self.board[r][c] != 0:
-                self.board[r][c] = 0
-                return
+        r = self.groundLevel[c]
+        self.board[r+1][c] = 0
+        self.updateKeyString(r+1,c,0)
+        self.groundLevel[c] += 1
         
-    def getKeyString(self,startingPlayer = 1):
-        key = ""
-        for r in range(len(self.board)-1,-1,-1):
-            for c in range(len(self.board[0])):
-                if startingPlayer == 1:
-                    key += str(self.board[r][c])
-                else:
-                    key += str(3-self.board[r][c]) # if first player was 2, then swap 1 and 2
-        return key
+    def playOptions(self):
+        enum = []
+        for i in [3,2,4,1,5,0,6]:
+            if self.board[0][i] == 0:
+                enum.append(i)
+        return enum
+    
+    def tieCheck(self):
+        if self.playOptions() == []:
+            return True
+        return False
     
     def winCondition(self):
         h = len(self.board)
